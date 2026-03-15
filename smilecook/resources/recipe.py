@@ -51,7 +51,7 @@ class RecipeResource(Resource):
             return {"message": "recipe not found"}, HTTPStatus.NOT_FOUND
         return recipe.data, HTTPStatus.OK
 
-    # update a recipe
+    # update a published recipe
     def put(self, recipe_id):
         data = request.get_json()
         recipe = next(
@@ -64,7 +64,7 @@ class RecipeResource(Resource):
         )
         if recipe is None:
             return {"message": "recipe not found"}, HTTPStatus.NOT_FOUND
-        print(f"just checking :: {recipe.id} vs {recipe_list[recipe_id]}")
+        
         # Update the recipe attributes with the new data
         recipe.name = data.get("name", recipe.name)
         recipe.description = data.get("description", recipe.description)
@@ -72,6 +72,22 @@ class RecipeResource(Resource):
         recipe.cook_time = data.get("cook_time", recipe.cook_time)
         recipe.directions = data.get("directions", recipe.directions)
         return recipe.data, HTTPStatus.OK
+
+    # delete a recipe for good
+    def delete(self, recipe_id):
+        recipe = next(
+            (
+                recipe
+                for recipe in recipe_list
+                if recipe.id == recipe_id and recipe.is_publish == True
+            ),
+            None,
+        )
+        if recipe is None:
+            return {"message": "recipe not found"}, HTTPStatus.NOT_FOUND
+        else:
+            recipe_list.remove(recipe)
+            return {}, HTTPStatus.OK
 
 
 class RecipePublishResource(Resource):
